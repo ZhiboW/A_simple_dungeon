@@ -128,6 +128,7 @@ int main() {
 			case command::help:
 				cout << "One word at a time\nMovement: \"north\", \"south\", \"east\", \"west\"\n"
 						"\"look\" to look around, \"map\" to check your map\n\"quit\" to exit.";
+				break;
 			case command::unknown:
 				cout << "Unknown command, you can always call for \"help\"";
 				break;
