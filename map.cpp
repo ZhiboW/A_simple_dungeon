@@ -144,7 +144,9 @@ string dungeon::print(int detail, unsigned int px, unsigned int py){
 	
 	vector<uint32_t> lims = {0, width - 1, 0, height -1};
 	
-	if(detail >= 1){
+	if(detail == 2){
+		lims = {px, px, py, py};
+	} else if(detail >= 1){
 		lims = {width, 0, height, 0};
 		
 		for (unsigned int y = 0; y < height; y++) {
@@ -175,8 +177,8 @@ string dungeon::print(int detail, unsigned int px, unsigned int py){
                 } else if (map[x][y].val == 2) {
                     ss << "\033[1;31m";
                 }
-                //show player tile only if detail level is < 2
-                if (detail < 2 && x == px && y == py){
+                //player tile
+                if (x == px && y == py){
                 	ss << "\033[7m";
 				}
                 
@@ -186,8 +188,9 @@ string dungeon::print(int detail, unsigned int px, unsigned int py){
         }
         ss << "\n";
     }
-    
-    return ss.str();
+    string buffer = ss.str();
+    buffer.pop_back();
+    return buffer;
 }
 
 vector<uint32_t> dungeon::get_start(){

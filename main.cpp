@@ -6,7 +6,12 @@
 #include <fstream>
 
 #ifdef _WIN32
-#include <windows.h>
+	#include <windows.h>
+    #include <conio.h>
+#else
+    #include <termios.h>
+    #include <unistd.h>
+    #include <stdio.h>
 #endif
 
 int main() {
@@ -22,15 +27,22 @@ int main() {
     player.y = buffer[1];
     player.dlvl = currentmap.level;
     
-    cout << "You arrive" << endl;
+    cout << "You arrive";
     
+    bool showmap = true;
     while(true){
     	if(currentmap.map[player.x][player.y].val == 2){
-    		cout << "You find the exit" << endl;
+    		cout << "\n" << currentmap.print(1, player.x, player.y);
+    		cout << "\nYou find the exit" << endl;
     		return 0;
 		}
 		currentmap.map[player.x][player.y].visited = true;
 		unsigned char doors = currentmap.map[player.x][player.y].doors;
+		if(showmap){
+			cout << "\n" << currentmap.print(2, player.x, player.y);
+		} else {
+			showmap = true;
+		}
 		cout << "\nYou can move ";
 		{
 			vector<string> dirs;
@@ -66,6 +78,7 @@ int main() {
 		cin >> input;
 		
 		command cmd = get_command(input);
+		//cout << "\033[H\033[J"; clear screen
 		switch(cmd){
 			case command::north:
 				if(doors & 8){
@@ -103,10 +116,12 @@ int main() {
 				cout << "Nothing special here";
 				break;
 			case command::map:
-				cout << currentmap.print(1, player.x, player.y);
+				cout << "You look at your map\n" << currentmap.print(1, player.x, player.y);
+				showmap = false;
 				break;
 			case command::mapall:
 				cout << currentmap.print(0, player.x, player.y);
+				showmap = false;
 				break;
 			case command::quit:
 				return 0;

@@ -2,3 +2,5 @@ old/
 *.o
 *.dev
 *.win
+*.layout
+*.sav
