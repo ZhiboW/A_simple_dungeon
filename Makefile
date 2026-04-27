@@ -5,7 +5,7 @@ CXXFLAGS = -std=c++11 -Wall -g
 BIN      = Dungeon_crawl
 
 # Object Files
-OBJ      = main.o map.o saves.o entity.o
+OBJ      = main.o map.o saves.o entity.o utils.o
 
 # Phony Targets (commands that aren't files)
 .PHONY: all clean
@@ -33,6 +33,10 @@ saves.o: saves.cpp saves.h map.h entity.h
 entity.o: entity.cpp entity.h utils.h
 	$(CXX) -c entity.cpp -o entity.o $(CXXFLAGS)
 
+# Compile utils.cpp
+utils.o: utils.cpp
+	$(CPP) -c utils.cpp -o utils.o $(CXXFLAGS)
+	
 # Clean up build files
 clean:
 	rm -f $(OBJ) $(BIN)
