@@ -1,7 +1,6 @@
 #include "map.h"
 #include "entity.h"
 #include "saves.h"
-#include <iostream>
 #include <cstdlib>
 #include <fstream>
 
@@ -18,30 +17,34 @@ int main() {
 	#ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     #endif
+    //load keybinds
+    keyreader listener;
+    listener.load_config("config.ini");
     
     entity player("Player");
-    dungeon currentmap(1, 10, 10, 0.15f);
-    
+    dungeon currentmap(1, 25, 25, 0.15f);
+    string savename = "";
+    //initialize player
     vector<uint32_t> buffer = currentmap.get_start();
     player.x = buffer[0];
     player.y = buffer[1];
     player.dlvl = currentmap.level;
-    
+    //gameplay main loop
     cout << "You arrive";
-    
     bool showmap = true;
     while(true){
-    	if(currentmap.map[player.x][player.y].val == 2){
-    		cout << "\n" << currentmap.print(1, player.x, player.y);
-    		cout << "\nYou find the exit" << endl;
-    		return 0;
-		}
-		currentmap.map[player.x][player.y].visited = true;
+    	//hud
+    	currentmap.map[player.x][player.y].visited = true;
 		unsigned char doors = currentmap.map[player.x][player.y].doors;
 		if(showmap){
 			cout << "\n" << currentmap.print(2, player.x, player.y);
 		} else {
 			showmap = true;
+		}
+    	if(currentmap.map[player.x][player.y].val == 2){
+    		cout << "\n" << currentmap.print(1, player.x, player.y);
+    		cout << "\nYou find the exit" << endl;
+    		return 0;
 		}
 		cout << "\nYou can move ";
 		{
@@ -73,12 +76,11 @@ int main() {
 		    }
 		    cout << directions;
 		}
-		cout << "\n> ";
-		string input = "";
-		cin >> input;
+		cout << "\n[ESC] MENU";
+		//input handler
+		command cmd = listener.handle_input();
 		
-		command cmd = get_command(input);
-		//cout << "\033[H\033[J"; clear screen
+		cout << "\033[H\033[J"; //clear screen
 		switch(cmd){
 			case command::north:
 				if(doors & 8){
@@ -112,6 +114,53 @@ int main() {
 					cout << "You push against the wall";
 				}
 				break;
+			case command::menu:
+				cout << "1: Save\n2: Load\n";
+				{
+					int menuset = listener.get_raw_key();
+					switch(menuset){
+						case 27:
+							break;
+						case '1':
+							if(savename.empty()){
+								cout << "Save as: ";
+								get_line_safe(savename);
+							}
+							try{
+								saves::save_player(savename + "p.sav", player);
+	                    		saves::save_floor(savename + "d.sav", currentmap);
+	                    		cout << "Saved as " << savename;
+							} catch (const std::exception& e) {
+								cout << "Save failed: " << e.what();
+							}
+	                    	break;
+	                    case '2':
+	                    	{
+		                    	cout << "Load file: ";
+		                    	get_line_safe(savename);
+		                    	entity buffer;
+		                    	dungeon buffmap;
+		                    	try{
+			                    	saves::load_player(savename + "p.sav", buffer);
+			                    	saves::load_floor(savename + "d.sav", player.dlvl, buffmap);
+			                    	player = buffer;
+			                    	currentmap = buffmap;
+			                    	cout << savename << "loaded";
+		                    	} catch (const std::exception& e){
+		                    		cout << "Load failed: " << e.what();
+								}
+							}
+	                    	break;
+	                    case '0':
+	                    	cout << currentmap.print(0, player.x, player.y);
+							showmap = false;
+							break;
+						default:
+							cout << "Invalid option";
+							break;
+					}
+					break;
+				}
 			case command::look:
 				cout << "Nothing special here";
 				break;
@@ -119,18 +168,14 @@ int main() {
 				cout << "You look at your map\n" << currentmap.print(1, player.x, player.y);
 				showmap = false;
 				break;
-			case command::mapall:
-				cout << currentmap.print(0, player.x, player.y);
-				showmap = false;
-				break;
 			case command::quit:
 				return 0;
 			case command::help:
-				cout << "One word at a time\nMovement: \"north\", \"south\", \"east\", \"west\"\n"
-						"\"look\" to look around, \"map\" to check your map\n\"quit\" to exit.";
+				cout << "Arrow keys for movement, [ESC] for menu\n"
+						"[l] to look around, [m] to check your map\n[q] to exit.";
 				break;
-			case command::unknown:
-				cout << "Unknown command, you can always call for \"help\"";
+			default:
+				cout << "Unknown command, [h] for help.";
 				break;
 		}
 	}

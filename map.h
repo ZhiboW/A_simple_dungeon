@@ -4,7 +4,6 @@
 #include "utils.h"
 #include <string>
 #include <stack>
-#include <iostream>
 #include <algorithm>
 #include <ctime>
 #include <sstream>
@@ -18,7 +17,7 @@ class tile;
 class tile{
 	public:
 		int val; //tile type: -1 void, 0 normal, 1 start, 2 end
-		unsigned char doors; // nesw 0000
+		unsigned char doors; //nesw 0000
 		unsigned short danger;//spawn chance
 		unsigned short loot;//loot spawn chance
 		tile(int val = 0, int danger = 0, int loot = 0, unsigned char doors = 0);
