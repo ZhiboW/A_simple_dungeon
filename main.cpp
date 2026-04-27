@@ -19,6 +19,7 @@ int main() {
     #endif
     //load keybinds
     keyreader listener;
+    generate_config();
     listener.load_config("config.ini");
     
     entity player("Player");

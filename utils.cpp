@@ -76,3 +76,16 @@ command keyreader::handle_input(){
     if (keybinds.count(raw)) return keybinds[raw];
     return command::unknown;
 }
+
+void generate_config(){
+	std::ifstream f("config.ini");
+	if (f.good()){
+		f.close();
+		return;
+	}
+	std::string blockstring = "# Movement\nUP=ARROW_UP\nDOWN=ARROW_DOWN\nLEFT=ARROW_LEFT\nRIGHT=ARROW_RIGHT\n\n# Quick options\nMENU=ESC\nMAP=m\nLOOK=l\nQUIT=q";
+	std::ofstream of("config.ini");
+	of << blockstring;
+	of.close();
+	return;
+}

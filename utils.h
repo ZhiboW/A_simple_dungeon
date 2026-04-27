@@ -66,4 +66,6 @@ inline void get_line_safe(std::string& out) {
 #endif
 }
 
+void generate_config();
+
 #endif
