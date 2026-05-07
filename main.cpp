@@ -63,7 +63,7 @@ int main() {
 			    		player.x = buffer[0];
 			    		player.y = buffer[1];
 						player.dlvl = currentmap.level;
-						break;
+						continue;
 				}
     		
 		}
