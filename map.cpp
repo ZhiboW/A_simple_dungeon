@@ -6,6 +6,7 @@ tile::tile(int val, int danger, int loot, unsigned char doors){
 	this->loot = loot;
 	this->doors = doors;
 	visited = false;
+	visible = false;
 }
 
 
@@ -120,7 +121,7 @@ bool dungeon::is_valid(int x, int y) const {
     return (x >= 0 && x < (int)width && y >= 0 && y < (int)height);
 }
 
-string dungeon::print(int detail, unsigned int px, unsigned int py){
+string dungeon::print(int detail, unsigned int px, unsigned int py, bool wallpeek){
 	stringstream ss;
 	
 	const char* box[] = {
@@ -141,12 +142,20 @@ string dungeon::print(int detail, unsigned int px, unsigned int py){
         "\u251c",     //E
         "\u253c"      //F
     };
-	
+	//cropping mask
 	vector<uint32_t> lims = {0, width - 1, 0, height -1};
 	
-	if(detail == 2){
-		lims = {px, px, py, py};
-	} else if(detail >= 1){
+	if (detail >= 0) { //vision radius
+        if (px < (unsigned int)detail) lims[0] = 0;
+        else lims[0] = px - detail;
+        lims[1] = px + detail;
+        if (lims[1] >= width) lims[1] = width - 1;
+        if (py < (unsigned int)detail) lims[2] = 0;
+        else lims[2] = py - detail;
+        lims[3] = py + detail;
+        if (lims[3] >= height) lims[3] = height - 1;
+        
+    } else if(detail == -1){ //visited tiles only
 		lims = {width, 0, height, 0};
 		
 		for (unsigned int y = 0; y < height; y++) {
@@ -163,15 +172,26 @@ string dungeon::print(int detail, unsigned int px, unsigned int py){
 	
 	for (unsigned int y = lims[2]; y <= lims[3]; y++) {
         for (unsigned int x = lims[0]; x <= lims[1]; x++) {
-        	//fog of war at detail mask >= 1
-        	if (detail >= 1 && !map[x][y].visited && !(x == px && y == py)) {
-                ss << " "; 
-                continue;
-            }
+        	//fog of war
+        	if (detail > 0){
+        		if (!wallpeek && !map[x][y].visited && !map[x][y].visible && !(x == px && y == py)) {
+	                ss << " "; 
+	                continue;
+	            }
+			}else{
+				if (!wallpeek && !map[x][y].visited && !(x == px && y == py)) {
+	                ss << " "; 
+	                continue;
+	            }
+			}
+        	
             if (map[x][y].val == -1) {
                 ss << "#"; // Void tile
             } 
             else {
+            	if(detail >= 0 && !wallpeek && !map[x][y].visible && map[x][y].visited){
+            		ss << "\033[90m";
+				}
             	if (map[x][y].val == 1) {
                     ss << "\033[1;32m";
                 } else if (map[x][y].val == 2) {
@@ -191,6 +211,34 @@ string dungeon::print(int detail, unsigned int px, unsigned int py){
     string buffer = ss.str();
     buffer.pop_back();
     return buffer;
+}
+
+void dungeon::visibility(unsigned int px, unsigned int py, int radius){
+	for (unsigned int y = 0; y < height; y++) {
+        for (unsigned int x = 0; x < width; x++) {
+            map[x][y].visible = false;
+        }
+    }
+    map[px][py].visible = true;
+    int dx[] = { 0, 1, 0, -1 }; //N, E, S, W
+    int dy[] = { -1, 0, 1, 0 };
+    unsigned char masks[] = { 8, 4, 2, 1 };
+    //straight lines until wall
+	for (int i = 0; i < 4; i++) {
+        unsigned int cx = px;
+        unsigned int cy = py;
+		
+        for (int d = 0; d < radius; d++) {
+            if (!(map[cx][cy].doors & masks[i])) break;
+
+            cx += dx[i];
+            cy += dy[i];
+
+            if (!is_valid(cx, cy)) break;
+
+            map[cx][cy].visible = true;
+        }
+    }
 }
 
 vector<uint32_t> dungeon::get_start(){

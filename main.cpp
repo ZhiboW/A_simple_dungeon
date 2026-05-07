@@ -34,14 +34,16 @@ int main() {
     cout << "You arrive";
     bool showmap = true;
     int floornum = 1;
+    player.vision = 1;
     while(true){
     	//hud
     	currentmap.map[player.x][player.y].visited = true;
+    	currentmap.visibility(player.x, player.y, player.vision);
 		unsigned char doors = currentmap.map[player.x][player.y].doors;
 		if(showmap){
-			cout << "\n" << currentmap.print(2, player.x, player.y);
+			cout << "\n" << currentmap.print(player.vision, player.x, player.y);
 		} else {
-			showmap = true;
+			cout << "\n" << currentmap.print(-1, player.x, player.y);
 		}
     	if(currentmap.map[player.x][player.y].val == 2){
     		cout << "\n" << currentmap.print(1, player.x, player.y);
@@ -166,14 +168,14 @@ int main() {
 			                    	saves::load_floor(savename + "d.sav", player.dlvl, buffmap);
 			                    	player = buffer;
 			                    	currentmap = buffmap;
-			                    	cout << savename << "loaded";
+			                    	cout << savename << " loaded";
 		                    	} catch (const std::exception& e){
 		                    		cout << "Load failed: " << e.what();
 								}
 							}
 	                    	break;
 	                    case '0':
-	                    	cout << currentmap.print(0, player.x, player.y);
+	                    	cout << currentmap.print(-2, player.x, player.y, true);
 							showmap = false;
 							break;
 						default:
@@ -183,10 +185,11 @@ int main() {
 					break;
 				}
 			case command::look:
-				cout << "Nothing special here";
+				cout << "You look around";
+				showmap = true;
 				break;
 			case command::map:
-				cout << "You look at your map\n" << currentmap.print(1, player.x, player.y);
+				cout << "You look at your map";
 				showmap = false;
 				break;
 			case command::quit:

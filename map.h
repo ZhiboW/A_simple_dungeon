@@ -21,7 +21,7 @@ class tile{
 		unsigned short danger;//spawn chance
 		unsigned short loot;//loot spawn chance
 		tile(int val = 0, int danger = 0, int loot = 0, unsigned char doors = 0);
-		bool visited;
+		bool visited, visible;
 };
 
 //dungeon map made up of n*m tiles
@@ -35,7 +35,8 @@ class dungeon{
 		vector<vector<tile>> map;
 		dungeon(unsigned int level = 0, unsigned int w = 25, unsigned int h = 25, float vc = 0.1f);
 		
-		string print(int detail = 0, unsigned int px = 0, unsigned int py = 0);
+		string print(int detail = 0, unsigned int px = 0, unsigned int py = 0, bool wallpeek = false);
+		void visibility(unsigned int px, unsigned int py, int radius);
 		vector<uint8_t> save() const;
 		void unpack(vector<uint8_t> block);
 		

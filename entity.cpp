@@ -5,6 +5,7 @@ entity::entity(string name){
 	dlvl = 1;
 	x = 0;
 	y = 0;
+	vision = 0;
 }
 
 vector<uint8_t> entity::save() const{
@@ -17,7 +18,8 @@ vector<uint8_t> entity::save() const{
 	push_to_block(block, dlvl);
 	push_to_block(block, x);
 	push_to_block(block, y);
-	
+	//stats
+	push_to_block(block, vision);
 	return block;
 }
 
@@ -35,4 +37,6 @@ void entity::unpack(vector<uint8_t> block){
     read_from_block(block, cursor, dlvl);
     read_from_block(block, cursor, x);
     read_from_block(block, cursor, y);
+    //stats
+    read_from_block(block, cursor, vision);
 }

@@ -12,6 +12,7 @@ class entity{
 		entity(string name = "Player");
 		vector<uint8_t> save() const;
 		void unpack(vector<uint8_t> block);
+		int vision;
 };
 
 #endif
