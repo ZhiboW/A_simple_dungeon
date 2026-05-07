@@ -33,6 +33,7 @@ int main() {
     //gameplay main loop
     cout << "You arrive";
     bool showmap = true;
+    int floornum = 1;
     while(true){
     	//hud
     	currentmap.map[player.x][player.y].visited = true;
@@ -44,8 +45,27 @@ int main() {
 		}
     	if(currentmap.map[player.x][player.y].val == 2){
     		cout << "\n" << currentmap.print(1, player.x, player.y);
-    		cout << "\nYou find the exit" << endl;
-    		return 0;
+    		cout << "\nYou find the next floor, proceed? (Y/N)" << endl;
+    		int menuset = listener.get_raw_key();
+				switch(menuset){
+					case 'y':
+						if(savename.empty()){
+								savename = "autosave";
+							}
+							try{
+								saves::save_player(savename + "p.sav", player);
+			            		saves::save_floor(savename + "d.sav", currentmap);
+							} catch (const std::exception& e) {
+								cout << "Save failed: " << e.what();
+							}
+						currentmap = dungeon(floornum, 25, 25, 0.15f);
+						buffer = currentmap.get_start();
+			    		player.x = buffer[0];
+			    		player.y = buffer[1];
+						player.dlvl = currentmap.level;
+						break;
+				}
+    		
 		}
 		cout << "\nYou can move ";
 		{
