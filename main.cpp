@@ -13,7 +13,7 @@
     #include <stdio.h>
 #endif
 
-int main() {
+int main(){
 	#ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     #endif
@@ -82,14 +82,14 @@ int main() {
 		    	directions = "nowhere";
 		    	break;
 			}
-		    for (size_t i = 0; i < dirs.size(); i++) {
+		    for (size_t i = 0; i < dirs.size(); i++){
 		        directions += dirs[i];
-		        //2 items
-		        if (dirs.size() == 2 && i == 0) {
+		        //2 directions
+		        if (dirs.size() == 2 && i == 0){
 		            directions += " and ";
 		        } 
-		        //more items
-		        else if (dirs.size() > 2 && i < dirs.size() - 1) {
+		        //more directions
+		        else if (dirs.size() > 2 && i < dirs.size() - 1){
 		            if (i == dirs.size() - 2) {
 		                directions += ", and ";
 		            } else {

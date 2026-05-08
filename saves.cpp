@@ -3,7 +3,7 @@
 
 namespace saves{
 
-	void save_floor(const string& filename, dungeon& savemap) {
+	void save_floor(const string& filename, dungeon& savemap){
 	    map<uint32_t, vector<uint8_t>> map_block;
 	    //load
 	    ifstream infile(filename, ios::binary);
@@ -22,7 +22,7 @@ namespace saves{
         map_block[savemap.level] = savemap.save();
 
         ofstream outfile(filename, ios::binary | ios::trunc);
-        if (!outfile.is_open())
+        if(!outfile.is_open())
             throw std::runtime_error("invalid dungeon filename");
             
         for(auto const& i : map_block){
@@ -31,13 +31,13 @@ namespace saves{
             outfile.write((char*)&mapsize, 4);
             outfile.write((char*)block.data(), mapsize);
         }
-        if (outfile.fail()) 
+        if(outfile.fail()) 
             throw std::runtime_error("writing failed");
     }
     
     bool load_floor(const string& filename, uint32_t id, dungeon& loadmap){
         ifstream infile(filename, ios::binary);
-        if (!infile.is_open()) 
+        if(!infile.is_open()) 
             throw std::runtime_error("invalid dungeon filename");
         
         uint32_t mapsize, i;
@@ -50,7 +50,7 @@ namespace saves{
                 infile.read((char*)block.data() + 4, mapsize - 4);
                 loadmap.unpack(block);
                 return true;
-            } else {
+            }else{
                 infile.seekg(mapsize - 4, ios::cur);
             }
         }
@@ -60,24 +60,24 @@ namespace saves{
     void save_player(const string& filename, const entity& player){
     	vector<uint8_t> block = player.save();
     	ofstream outfile(filename, ios::binary | ios::trunc);
-    	if (!outfile.is_open()){
+    	if(!outfile.is_open()){
             throw std::runtime_error("invalid player filename");
         }
         uint32_t size = (uint32_t)block.size();
         outfile.write((char*)& size, 4);
         outfile.write((char*)block.data(), size);
         
-        if (outfile.fail()) 
+        if(outfile.fail()) 
             throw std::runtime_error("writing player data failed");
 	}
 	
-	bool load_player(const string& filename, entity& player) {
+	bool load_player(const string& filename, entity& player){
 	    ifstream infile(filename, ios::binary);
-	    if (!infile.is_open()) 
+	    if(!infile.is_open()) 
             throw std::runtime_error("invalid player filename");
 	
 	    uint32_t size;
-	    if (infile.read((char*)&size, 4)) {
+	    if(infile.read((char*)&size, 4)){
 	        vector<uint8_t> block(size);
 	        infile.read((char*)block.data(), size);
 	        player.unpack(block);

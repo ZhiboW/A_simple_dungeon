@@ -19,22 +19,22 @@
 
 //save utils
 template<typename T>
-void push_to_block(std::vector<uint8_t>& v, const T& value) {
+void push_to_block(std::vector<uint8_t>& v, const T& value){
     const uint8_t* p = reinterpret_cast<const uint8_t*>(&value);
     v.insert(v.end(), p, p + sizeof(T));
 }
 
 template<typename T>
-void read_from_block(const std::vector<uint8_t>& block, size_t& cursor, T& dest) {
+void read_from_block(const std::vector<uint8_t>& block, size_t& cursor, T& dest){
     // Basic safety check to prevent reading past the end
-    if (cursor + sizeof(T) <= block.size()) {
+    if(cursor + sizeof(T) <= block.size()){
         std::memcpy(&dest, &block[cursor], sizeof(T));
         cursor += sizeof(T);
     }
 }
 
 //keyboard
-enum raw_keys {
+enum raw_keys{
     RAW_UP = 1000, RAW_DOWN, RAW_LEFT, RAW_RIGHT, 
     RAW_ESC = 27, RAW_ENTER = 13, RAW_TAB = 9
 };
@@ -44,7 +44,7 @@ enum class command{
 	look, mapall, help, menu
 };
 
-class keyreader {
+class keyreader{
 private:
     std::map<int, command> keybinds;
 public:
