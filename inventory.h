@@ -10,10 +10,10 @@ using namespace std;
 class item{
 	public:
 		string name; // item name
-		unsigned int item_id, type; // item identifier, item type, search by type, number from item list
-		int cost, resell;
-		unordered_map statblock<int, double>; //variable sized stat block, flexible stat allocation
-		void read_item(unsigned int type, unsigned int id);
+		uint32_t item_id, type; // item identifier, item type, search by type, number from item list
+		int cost, resell, uses;
+		unordered_map statblock<uint32_t, double>; //variable sized stat block, flexible stat allocation
+		void read_item(uint32_t type, uint32_t id);
 };
 
 class inv{
