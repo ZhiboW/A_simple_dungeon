@@ -17,7 +17,6 @@ def push_string_bin(s):
 #binary to string
 def read_string_bin(b, offset):
     length = struct.unpack_from("I", b, offset)[0]
-    print(f"strlen {length}")
     offset += 4
     s = b[offset:offset+length].decode('utf-8')
     offset += length
@@ -216,7 +215,6 @@ def extract_items(ifname):
             offset += 4
             sdblock[name] = val
         statdicts[tablename] = sdblock
-    print(statdicts)
     #ntypes and number of members
     ntypes = struct.unpack_from("I", inbin, offset)[0]
     offset += 4
@@ -231,15 +229,12 @@ def extract_items(ifname):
             offset += 4
     item_dict = {}
     for i in range(ntypes):
-        print(f"type {i}")
         itype, typesize = struct.unpack_from("<II", inbin, offset)
         offset += 8
         for j in range(itemcounts[i]):
-            print(f"itemcount {j} in {itemcounts[i]}")
             buffer = item()
             offset = buffer.from_bin(inbin, offset)
             item_dict.setdefault(buffer.type, []).append(buffer) #dict{type:[items]}
-            print(buffer.statblock)
     return item_dict, statdicts
 #write items to file
 def write_itemcsvs(item_dict, statdicts, metaname, listname):
