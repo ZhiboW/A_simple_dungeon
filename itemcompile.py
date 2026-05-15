@@ -17,6 +17,7 @@ def push_string_bin(s):
 #binary to string
 def read_string_bin(b, offset):
     length = struct.unpack_from("I", b, offset)[0]
+    print(f"strlen {length}")
     offset += 4
     s = b[offset:offset+length].decode('utf-8')
     offset += length
@@ -134,9 +135,9 @@ class item:
         
         stat_data = bytearray()
         for s_id, s_val in self.statblock.items():
-            stat_data.extend(struct.pack("Id", s_id, s_val))
+            stat_data.extend(struct.pack("<Id", s_id, s_val))
         
-        itemblock = struct.pack("I", self.id) + bin_name + struct.pack("iiiI", self.cost, self.sell, self.uses, len(self.statblock)) + stat_data
+        itemblock = struct.pack("I", self.id) + bin_name + struct.pack("<iiiI", self.cost, self.sell, self.uses, len(self.statblock)) + stat_data
         
         return struct.pack("I", len(itemblock)) + itemblock
     
@@ -146,12 +147,12 @@ class item:
         self.id = struct.unpack_from("I", itemblock, offset)[0]
         offset += 4
         self.name, offset = read_string_bin(itemblock, offset)
-        self.cost, self.sell, self.uses, nstats = struct.unpack_from("iiiI", itemblock, offset)
-        offset += 12
+        self.cost, self.sell, self.uses, nstats = struct.unpack_from("<iiiI", itemblock, offset)
+        offset += 16
         
         statblock = {}
         for i in range(nstats):
-            s_id, s_val = struct.unpack_from("Id", itemblock, offset)
+            s_id, s_val = struct.unpack_from("<Id", itemblock, offset)
             offset += 12
             statblock[s_id] = s_val
         self.statblock = statblock
@@ -190,7 +191,7 @@ def write_itemdb(statdicts, item_dict, ofname):
             outbin += struct.pack("I", j.id)
     #write typeid, size of block, items
     for i in range(len(type_ids)):
-        outbin += struct.pack("II", type_ids[i], len(type_bytes[i])) + type_bytes[i]
+        outbin += struct.pack("<II", type_ids[i], len(type_bytes[i])) + type_bytes[i]
     
     with open(ofname, "wb") as outfile:
         outfile.write(outbin)
@@ -215,6 +216,7 @@ def extract_items(ifname):
             offset += 4
             sdblock[name] = val
         statdicts[tablename] = sdblock
+    print(statdicts)
     #ntypes and number of members
     ntypes = struct.unpack_from("I", inbin, offset)[0]
     offset += 4
@@ -229,25 +231,28 @@ def extract_items(ifname):
             offset += 4
     item_dict = {}
     for i in range(ntypes):
-        itype, typesize = struct.unpack_from("II", inbin, offset)
+        print(f"type {i}")
+        itype, typesize = struct.unpack_from("<II", inbin, offset)
         offset += 8
         for j in range(itemcounts[i]):
+            print(f"itemcount {j} in {itemcounts[i]}")
             buffer = item()
             offset = buffer.from_bin(inbin, offset)
             item_dict.setdefault(buffer.type, []).append(buffer) #dict{type:[items]}
+            print(buffer.statblock)
     return item_dict, statdicts
 #write items to file
 def write_itemcsvs(item_dict, statdicts, metaname, listname):
-    with open(metaname, "w") as outfile:
+    with open(metaname, "w", newline = "") as outfile:
         writer = csv.writer(outfile)
         for name, table in statdicts.items():
-            writer.writerow([name] + list(table.values()))
             writer.writerow([name+"id"] + list(table.keys()))
+            writer.writerow([name] + list(table.values()))
             writer.writerow([])
     
     with open(listname, "w") as outfile:
         outfile.write("NAME,ID,TYPE\n")
-        writer.writerow("STAT,VALUE\n")
+        outfile.write("STAT,VALUE\n")
         
         for typeid, items in item_dict.items():
             for i in items:
@@ -274,6 +279,6 @@ if __name__ == "__main__":
         item_dict = {}
         for block in item_list[1:]:
             buffer = item()
-            if buffer.from_string(block, statdicts):
-                item_dict.setdefault(buffer.type, []).append(buffer) #dict{type:[items]}
+            buffer.from_string(block, statdicts)
+            item_dict.setdefault(buffer.type, []).append(buffer) #dict{type:[items]}
         write_itemdb(statdicts, item_dict, "items.db")
